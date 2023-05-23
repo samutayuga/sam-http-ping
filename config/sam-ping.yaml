@@ -1,0 +1,11 @@
+port: 8080
+endPoints:
+- name: google
+  url: https://www.google.com
+- name: frontend
+  url: http://frontend.magellan.svc.cluster.local:8080
+- name: backend
+  url: http://backend.magellan.svc.cluster.local:8081
+- name: storage 
+  url: http://storage.magellan.svc.cluster.local:8082
+    
