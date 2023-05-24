@@ -13,6 +13,31 @@ import (
 	"go.uber.org/zap"
 )
 
+type SamPropagator interface {
+	doGet(url string) *SamResponse
+}
+type SamPayload struct {
+	httClient *http.Client
+}
+type SamResponse struct {
+	ResponseCode    int
+	ResponseMessage string
+}
+
+//implement the interface Propagator on Payload type
+func (p *SamPayload) doGet(url string) *SamResponse {
+	if httpResp, errGet := p.httClient.Get(url); errGet == nil {
+		defer httpResp.Body.Close()
+		r := SamResponse{ResponseCode: httpResp.StatusCode, ResponseMessage: "OK"}
+		logger.Info("Response with", zap.Int("response", r.ResponseCode))
+		return &r
+	} else {
+		logger.Error("error while performing request", zap.String("url", url), zap.Error(errGet))
+		return &SamResponse{ResponseCode: -1, ResponseMessage: errGet.Error()}
+	}
+
+}
+
 var (
 	logger     *zap.Logger
 	crLoggErr  error
@@ -31,27 +56,30 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func doPropagate(singleMap interface{}, payload *SamPayload) *SamResponse {
+	if aMap, correct := singleMap.(map[string]interface{}); correct {
+		if aVal, exists := aMap["url"]; exists {
+
+			aResp := payload.doGet(aVal.(string))
+			logger.Info("response from get url ", zap.String("url", aVal.(string)),
+				zap.Int("responseCode", aResp.ResponseCode),
+				zap.String("responseMessage", aResp.ResponseMessage))
+
+			return aResp
+		}
+	}
+	return nil
+}
 func Propagate(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Serving request", zap.String("origin", r.Host))
-	allResponse := make([]map[string]string, 0)
+	p := SamPayload{httClient: &http.Client{}}
+
+	allResponse := make([]*SamResponse, 0)
 	for _, val := range endPoints {
-		if aMap, correct := val.(map[string]interface{}); correct {
-			if aVal, exists := aMap["url"]; exists {
-				logger.Info("accessing url ", zap.String("name", aVal.(string)))
-				aContent := make(map[string]string)
-				aContent["url"] = aVal.(string)
-
-				if resp, errorGet := http.Get(aVal.(string)); errorGet == nil {
-					defer resp.Body.Close()
-					aContent["status"] = resp.Status
-				} else {
-					logger.Error("error while performing request", zap.String("url", aContent["url"]), zap.Error(errorGet))
-					aContent["status"] = "NOK"
-				}
-
-				allResponse = append(allResponse, aContent)
-			}
-		}
+		//use the go routine
+		aResp := doPropagate(val, &p)
+		allResponse = append(allResponse, aResp)
 
 	}
 	logger.Info("responding with", zap.Any("all urls", allResponse))
