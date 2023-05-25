@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -57,7 +58,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func doPropagate(singleMap interface{}, payload *SamPayload) *SamResponse {
+func doPropagate(singleMap interface{}, payload *SamPayload, resp chan *SamResponse) {
 	if aMap, correct := singleMap.(map[string]interface{}); correct {
 		if aVal, exists := aMap["url"]; exists {
 
@@ -66,21 +67,39 @@ func doPropagate(singleMap interface{}, payload *SamPayload) *SamResponse {
 				zap.Int("responseCode", aResp.ResponseCode),
 				zap.String("responseMessage", aResp.ResponseMessage))
 
-			return aResp
+			resp <- aResp
+
 		}
 	}
-	return nil
+	//return nil
+}
+func managePropagation(requestor *SamPayload, allResponseChan chan *SamResponse) {
+	for _, _val := range endPoints {
+		go func(myVal interface{}) {
+			doPropagate(myVal, requestor, allResponseChan)
+		}(_val)
+
+	}
 }
 func Propagate(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Serving request", zap.String("origin", r.Host))
 	p := SamPayload{httClient: &http.Client{}}
 
 	allResponse := make([]*SamResponse, 0)
-	for _, val := range endPoints {
-		//use the go routine
-		aResp := doPropagate(val, &p)
-		allResponse = append(allResponse, aResp)
+	allResponseChan := make(chan *SamResponse, len(endPoints))
+	managePropagation(&p, allResponseChan)
+	//monitor the response
+	for {
+		allResponse = append(allResponse, <-allResponseChan)
+		logger.Info("receive result", zap.Int("so far received ", len(allResponse)))
+		if len(allResponse) >= len(endPoints) {
+			logger.Info("completed ...")
 
+			break
+		}
+
+		logger.Info("waiting ...")
+		time.Sleep(time.Duration(1) * time.Second)
 	}
 	logger.Info("responding with", zap.Any("all urls", allResponse))
 	if contentBytes, errorMars := json.Marshal(allResponse); errorMars != nil {
