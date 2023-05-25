@@ -38,7 +38,7 @@ func (p *SamPayload) doGet(url string) *SamResponse {
 		Logger.Info("Response with", zap.Int("response", r.ResponseCode))
 		return &r
 	} else {
-		Logger.Error("error while performing request", zap.String("url", url), zap.Error(errGet))
+		Logger.Warn("failed the make http call", zap.String("url", url), zap.Error(errGet))
 		return &SamResponse{ResponseCode: -1, ResponseMessage: errGet.Error(), Origin: hostN, Destination: url}
 	}
 
