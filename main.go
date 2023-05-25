@@ -23,18 +23,26 @@ type SamPayload struct {
 type SamResponse struct {
 	ResponseCode    int
 	ResponseMessage string
+	Origin          string
+	Destination     string
 }
 
 //implement the interface Propagator on Payload type
 func (p *SamPayload) doGet(url string) *SamResponse {
+	var hostN string
+	var errH error
+	if hostN, errH = os.Hostname(); errH != nil {
+		logger.Error("cannot get hostname", zap.Error(errH))
+	}
 	if httpResp, errGet := p.httClient.Get(url); errGet == nil {
 		defer httpResp.Body.Close()
-		r := SamResponse{ResponseCode: httpResp.StatusCode, ResponseMessage: "OK"}
+
+		r := SamResponse{ResponseCode: httpResp.StatusCode, ResponseMessage: "OK", Origin: hostN, Destination: url}
 		logger.Info("Response with", zap.Int("response", r.ResponseCode))
 		return &r
 	} else {
 		logger.Error("error while performing request", zap.String("url", url), zap.Error(errGet))
-		return &SamResponse{ResponseCode: -1, ResponseMessage: errGet.Error()}
+		return &SamResponse{ResponseCode: -1, ResponseMessage: errGet.Error(), Origin: hostN, Destination: url}
 	}
 
 }
