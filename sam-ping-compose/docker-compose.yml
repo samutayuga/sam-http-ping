@@ -1,0 +1,11 @@
+---
+version: '2'
+services:
+  http-ping:
+    image: samutup/http-ping:0.0.1-SNAPSHOT
+    hostname: http-ping
+    container_name: http-ping
+    ports:
+      - "5115:5115"
+    environment:
+      LABEL_ENV: TESTING

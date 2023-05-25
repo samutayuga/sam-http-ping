@@ -34,8 +34,8 @@ func (p *SamPayload) doGet(url string) *SamResponse {
 	if httpResp, errGet := p.httClient.Get(url); errGet == nil {
 		defer httpResp.Body.Close()
 
-		r := SamResponse{ResponseCode: httpResp.StatusCode, ResponseMessage: "OK", Origin: hostN, Destination: url}
-		Logger.Info("Response with", zap.Int("response", r.ResponseCode))
+		r := SamResponse{ResponseCode: httpResp.StatusCode, ResponseMessage: httpResp.Status, Origin: hostN, Destination: url}
+		//Logger.Info("Response with", zap.Int("response", r.ResponseCode))
 		return &r
 	} else {
 		Logger.Warn("failed the make http call", zap.String("url", url), zap.Error(errGet))
