@@ -38,21 +38,13 @@ You should see the following response,
 
 ```json
   ...
-* Connected to 127.0.0.1 (127.0.0.1) port 5115 (#0)
-> GET /propagate HTTP/1.1
-> Host: 127.0.0.1:5115
-> User-Agent: curl/7.77.0
-> Accept: */*
-> 
-  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0* Mark bundle as not supporting multiuse
+
 < HTTP/1.1 200 OK
 < Date: Thu, 25 May 2023 12:54:26 GMT
 < Content-Length: 841
 < Content-Type: text/plain; charset=utf-8
 < 
-{ [841 bytes data]
-100   841  100   841    0     0    119      0  0:00:07  0:00:07 --:--:--   175
-* Connection #0 to host 127.0.0.1 left intact
+...
 [
   {
     "ResponseCode": 200,
@@ -101,7 +93,27 @@ If everything goes well you should see,
  => => naming to docker.io/samutup/http-ping:0.0.1-SNAPSHOT 
 ```
 
-All right, now a brand new docker image is created in the local docker registry. The next step is to run it. With the helm of `docker-compose`, running the docker container from an image is more abstract. There is docker compose file, in this project under, `sam-ping-compose` folder.
+All right, now a brand new docker image is created in the local docker registry. 
+The next step is to run it. With the help of `docker-compose`, 
+running the docker container from an image is more convenient. 
+There is docker compose file, in this project under, `sam-ping-compose` folder.
+
+This file, defines the the service configuration for the container to be run.
+
+```yaml
+version: '2'
+services:
+  http-ping:
+    image: samutup/http-ping:0.0.1-SNAPSHOT
+    hostname: http-ping.backend
+    container_name: http-ping
+    ports:
+      - "5115:5115"
+    environment:
+      LABEL_ENV: backend
+```
+In this case, the container will run with the name, `http-ping`, with hostname, `http-ping.backend`
+It exposes the port `5115` and listening at port `5115`
 Go into the folder then run the command,
 
 ```shell

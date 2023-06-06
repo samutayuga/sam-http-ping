@@ -8,4 +8,4 @@ services:
     ports:
       - "5115:5115"
     environment:
-      LABEL_ENV: TESTING
+      APP_NAME: DOCKER_APP
