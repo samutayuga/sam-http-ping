@@ -37,13 +37,6 @@ curl 127.0.0.1:5115/propagate | jq
 You should see the following response,
 
 ```json
-  ...
-
-< HTTP/1.1 200 OK
-< Date: Thu, 25 May 2023 12:54:26 GMT
-< Content-Length: 841
-< Content-Type: text/plain; charset=utf-8
-< 
 ...
 [
   {

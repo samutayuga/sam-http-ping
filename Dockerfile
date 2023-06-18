@@ -21,11 +21,10 @@ WORKDIR /app
 
 COPY --from=builder /http-ping ./http-ping
 COPY config ./config
-RUN adduser -S appuser
+RUN adduser -S appuser appuser
 
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.13 && \
-    wget -qO/app/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-    chmod +x /app/grpc_health_probe
+RUN chown -R appuser /app/config
+USER appuser
 
 ENV APP_NAME=PLACE_HOLDER
 

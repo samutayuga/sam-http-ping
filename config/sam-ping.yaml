@@ -3,9 +3,9 @@ endPoints:
 - name: google
   url: https://www.google.com
 - name: frontend
-  url: http://frontend.magellan.svc.cluster.local:8080
+  url: http://frontend.magellan.svc.cluster.local:8080/ping
 - name: backend
-  url: http://backend.magellan.svc.cluster.local:8081
+  url: http://backend.magellan.svc.cluster.local:8081/ping
 - name: storage 
-  url: http://storage.magellan.svc.cluster.local:8082
+  url: http://storage.magellan.svc.cluster.local:8082/ping
     
