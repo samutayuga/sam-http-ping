@@ -8,6 +8,7 @@ import (
 
 	"sam-http-ping/cmd"
 
+	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -23,6 +24,9 @@ func main() {
 	go func() {
 		//start in another go routing
 		cmd.Logger.Info("starting http server", zap.String("appName", appName), zap.String("address", address))
+		//go-figure.
+		aFig := figure.NewColorFigure(appName, "", "white", true)
+		aFig.Print()
 
 		if errListen := http.ListenAndServe(address, router); errListen != nil {
 			cmd.Logger.Error("Error starting http server", zap.String("address", address), zap.Error(errListen))
