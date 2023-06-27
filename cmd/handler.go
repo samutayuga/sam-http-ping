@@ -3,8 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -22,6 +26,7 @@ type SamResponse struct {
 	ResponseMessage string
 	Origin          string
 	Destination     string
+	DnsCheckingMsg  string
 }
 
 //implement the interface Propagator on Payload type
@@ -63,11 +68,34 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func resolveIP(aVal string) string {
+	sUrl, parseUrlErr := url.ParseRequestURI(aVal)
+	if parseUrlErr != nil {
+		Logger.Error("cannot parse url string", zap.String("url", aVal), zap.Error(parseUrlErr))
+	}
+	aHost := sUrl.Host
+	aHostArr := strings.Split(aHost, ":")
+
+	ipAddress, errGetIp := net.LookupIP(aHostArr[0])
+
+	if errGetIp != nil {
+		Logger.Error("cannot resolve ip address", zap.String("host", aHost), zap.Error(errGetIp))
+		return errGetIp.Error()
+	}
+	Logger.Info("ip address is resolved properly", zap.String("host", aHost), zap.Any("ip address", ipAddress))
+	return fmt.Sprintf("%s is resolved succesfully, ip address %v ", aHost, ipAddress)
+
+}
+
 func doPropagate(singleMap interface{}, payload *SamPayload, resp chan *SamResponse) {
 	if aMap, correct := singleMap.(map[string]interface{}); correct {
 		if aVal, exists := aMap["url"]; exists {
+			//resolve ip
+			ipResolution := resolveIP(aVal.(string))
 
 			aResp := payload.doGet(aVal.(string))
+			aResp.DnsCheckingMsg = ipResolution
+
 			Logger.Info("response from get url ", zap.String("url", aVal.(string)),
 				zap.Int("responseCode", aResp.ResponseCode),
 				zap.String("responseMessage", aResp.ResponseMessage))
