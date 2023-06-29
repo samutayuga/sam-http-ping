@@ -170,8 +170,8 @@ That command creates a yaml file, `app-config.yaml`
 ```shell
 kubectl create secret docker-registry samutup-secrets \
 --docker-server=https://hub.docker.com \
---docker-username=samutup \
---docker-password=Balinese100% \
+--docker-username=XXXXXX \
+--docker-password=XXXXX \
 --namespace magellan \
 --output yaml --dry-run=client | kubectl apply -f -
 ```
