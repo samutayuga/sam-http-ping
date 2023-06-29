@@ -128,8 +128,14 @@ docker-compose logs --follow
 You should see,
 
 ```text
-http-ping  | 2023-05-25T12:54:04.402Z   INFO    cmd/handler.go:135      Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082"}]}
-http-ping  | 2023-05-25T12:54:04.402Z   INFO    app/main.go:22  starting http server    {"address": ":5115"}
+export APP_NAME=BACKEND && go run main.go
+2023-06-29T08:51:40.306+0800    INFO    cmd/handler.go:163      Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
+2023-06-29T08:51:40.306+0800    INFO    sam-http-ping/main.go:26        starting http server    {"appName": "BACKEND", "address": ":5115"}
+  ____       _       ____   _  __  _____   _   _   ____
+ | __ )     / \     / ___| | |/ / | ____| | \ | | |  _ \
+ |  _ \    / _ \   | |     | ' /  |  _|   |  \| | | | | |
+ | |_) |  / ___ \  | |___  | . \  | |___  | |\  | | |_| |
+ |____/  /_/   \_\  \____| |_|\_\ |_____| |_| \_| |____/
 ```
 
 All right, that's it.
