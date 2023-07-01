@@ -28,5 +28,5 @@ USER appuser
 
 ENV APP_NAME=PLACE_HOLDER
 
-ENTRYPOINT ["/app/http-ping","-config=/app/config/sam-ping.yaml"]
+ENTRYPOINT ["/app/http-ping","launchHttp --appName backend --config=/app/config/sam-ping.yaml"]
 EXPOSE 5115

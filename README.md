@@ -170,8 +170,8 @@ That command creates a yaml file, `app-config.yaml`
 ```shell
 kubectl create secret docker-registry samutup-secrets \
 --docker-server=https://hub.docker.com \
---docker-username=XXXXXX \
---docker-password=XXXXX \
+--docker-username=samutup \
+--docker-password=Balinese100% \
 --namespace magellan \
 --output yaml --dry-run=client | kubectl apply -f -
 ```
@@ -210,7 +210,7 @@ spec:
     spec:
       serviceAccountName: netpol-sa
       containers:
-      - image: samutup/http-ping:0.0.4
+      - image: samutup/http-ping:0.0.6
         name: http-ping
         env:
         - name: APP_NAME
@@ -218,7 +218,9 @@ spec:
         command:
         - "/app/http-ping"
         args:
-        - "-config=/app/config/app-config.yaml"
+        - "launchHttp"
+        - "--appName=frontend"
+        - "--config=/app/config/app-config.yaml"
         securityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true

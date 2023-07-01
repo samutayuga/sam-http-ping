@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -56,6 +54,10 @@ var (
 	endPoints           []interface{}
 	Port                int
 	filteredEndPoints   []interface{}
+	kClientCmdParams    KubeClientCmd
+	httpCmdParams       HttpCmdParam
+	//givenAppName        string
+	//httpParam           *HttpCmdParam
 )
 
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
@@ -145,34 +147,50 @@ func Propagate(w http.ResponseWriter, r *http.Request) {
 }
 func init() {
 
-	AppName = os.Getenv("APP_NAME")
+	//AppName = os.Getenv("APP_NAME")
 	config := zap.NewDevelopmentConfig()
 	config.Level.SetLevel(zap.InfoLevel)
 	if Logger, crLoggErr = config.Build(); crLoggErr != nil {
 		panic("error when setup the log")
 	}
-	flag.StringVar(&configPath, "config", "config/sam-ping.yaml", "a config string variable")
-	flag.Parse()
-	viper.SetConfigFile(configPath)
-	if errRead := viper.ReadInConfig(); errRead != nil {
-		Logger.Error("error while loading config", zap.String("config file", configPath), zap.Error(errRead))
-	}
-	Port = viper.GetInt("port")
+	// flag.StringVar(&configPath, "config", "config/sam-ping.yaml", "a config string variable")
+	// flag.Parse()
+	// viper.SetConfigFile(configPath)
+	// if errRead := viper.ReadInConfig(); errRead != nil {
+	// 	Logger.Error("error while loading config", zap.String("config file", configPath), zap.Error(errRead))
+	// }
+	// Port = viper.GetInt("port")
 
-	anEndpoints := viper.Get("endPoints")
-	var ok bool
-	if endPoints, ok = anEndpoints.([]interface{}); ok {
-		Logger.Info("Reading configuration", zap.Int("port", Port), zap.Any("endpoints", endPoints))
-		filteredEndPoints = make([]interface{}, 0)
-		for _, aVal := range endPoints {
-			if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {
-				if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != AppName {
-					filteredEndPoints = append(filteredEndPoints, aMapEp)
-				}
-			}
-		}
-		Logger.Info("Final endpoints", zap.Any("filteredEndPoints", filteredEndPoints))
+	// anEndpoints := viper.Get("endPoints")
+	// var ok bool
+	// if endPoints, ok = anEndpoints.([]interface{}); ok {
+	// 	Logger.Info("Reading configuration", zap.Int("port", Port), zap.Any("endpoints", endPoints))
+	// 	filteredEndPoints = make([]interface{}, 0)
+	// 	for _, aVal := range endPoints {
+	// 		if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {
+	// 			if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != AppName {
+	// 				filteredEndPoints = append(filteredEndPoints, aMapEp)
+	// 			}
+	// 		}
+	// 	}
+	// 	Logger.Info("Final endpoints", zap.Any("filteredEndPoints", filteredEndPoints))
 
+	// }
+
+	//httpParam = HttpCmdParam{}
+
+	kClientCmdParams = KubeClientCmd{
+		inCluster: "",
 	}
+	httpCmdParams = HttpCmdParam{}
+
+	RootCommand.AddCommand(LaunchHttpCommand)
+	LaunchHttpCommand.Flags().StringVarP(&httpCmdParams.appName, "appName", "a", "backend", "launchHttp -a backend")
+	LaunchHttpCommand.Flags().StringVarP(&httpCmdParams.configLocation, "config", "c", "config/sam-ping.yaml", "launchHttp -c config/sam-ping.yaml")
+	LaunchHttpCommand.MarkFlagRequired("appName")
+	LaunchHttpCommand.MarkFlagRequired("config")
+	RootCommand.AddCommand(monitorDeployment)
+	monitorDeployment.Flags().StringVarP(&kClientCmdParams.inCluster, "inCluster", "i", "false", "monitorDeployment -i false")
+	monitorDeployment.MarkFlagRequired("inCluster")
 
 }
