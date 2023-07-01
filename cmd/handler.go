@@ -50,11 +50,12 @@ func (p *SamPayload) doGet(url string) *SamResponse {
 }
 
 var (
-	Logger     *zap.Logger
-	crLoggErr  error
-	configPath string
-	endPoints  []interface{}
-	Port       int
+	Logger              *zap.Logger
+	crLoggErr           error
+	configPath, AppName string
+	endPoints           []interface{}
+	Port                int
+	filteredEndPoints   []interface{}
 )
 
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +108,7 @@ func doPropagate(singleMap interface{}, payload *SamPayload, resp chan *SamRespo
 	//return nil
 }
 func managePropagation(requestor *SamPayload, allResponseChan chan *SamResponse) {
-	for _, _val := range endPoints {
+	for _, _val := range filteredEndPoints {
 		go func(myVal interface{}) {
 			doPropagate(myVal, requestor, allResponseChan)
 		}(_val)
@@ -119,13 +120,13 @@ func Propagate(w http.ResponseWriter, r *http.Request) {
 	p := SamPayload{httClient: &http.Client{}}
 
 	allResponse := make([]*SamResponse, 0)
-	allResponseChan := make(chan *SamResponse, len(endPoints))
+	allResponseChan := make(chan *SamResponse, len(filteredEndPoints))
 	managePropagation(&p, allResponseChan)
 	//monitor the response
 	for {
 		allResponse = append(allResponse, <-allResponseChan)
 		Logger.Info("receive result", zap.Int("so far received ", len(allResponse)))
-		if len(allResponse) >= len(endPoints) {
+		if len(allResponse) >= len(filteredEndPoints) {
 			Logger.Info("completed ...")
 
 			break
@@ -144,6 +145,7 @@ func Propagate(w http.ResponseWriter, r *http.Request) {
 }
 func init() {
 
+	AppName = os.Getenv("APP_NAME")
 	config := zap.NewDevelopmentConfig()
 	config.Level.SetLevel(zap.InfoLevel)
 	if Logger, crLoggErr = config.Build(); crLoggErr != nil {
@@ -161,6 +163,15 @@ func init() {
 	var ok bool
 	if endPoints, ok = anEndpoints.([]interface{}); ok {
 		Logger.Info("Reading configuration", zap.Int("port", Port), zap.Any("endpoints", endPoints))
+		filteredEndPoints = make([]interface{}, 0)
+		for _, aVal := range endPoints {
+			if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {
+				if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != AppName {
+					filteredEndPoints = append(filteredEndPoints, aMapEp)
+				}
+			}
+		}
+		Logger.Info("Final endpoints", zap.Any("filteredEndPoints", filteredEndPoints))
 
 	}
 

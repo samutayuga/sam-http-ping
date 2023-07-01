@@ -19,13 +19,13 @@ func main() {
 	router.HandleFunc("/propagate", cmd.Propagate)
 	address := fmt.Sprintf(":%d", cmd.Port)
 	//get app name
-	appName := os.Getenv("APP_NAME")
+	//appName := os.Getenv("APP_NAME")
 
 	go func() {
 		//start in another go routing
-		cmd.Logger.Info("starting http server", zap.String("appName", appName), zap.String("address", address))
+		cmd.Logger.Info("starting http server", zap.String("appName", cmd.AppName), zap.String("address", address))
 		//go-figure.
-		aFig := figure.NewColorFigure(appName, "", "white", true)
+		aFig := figure.NewColorFigure(cmd.AppName, "", "white", true)
 		aFig.Print()
 
 		if errListen := http.ListenAndServe(address, router); errListen != nil {
