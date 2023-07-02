@@ -20,11 +20,11 @@ type SamPayload struct {
 	httClient *http.Client
 }
 type SamResponse struct {
-	ResponseCode    int
-	ResponseMessage string
-	Origin          string
-	Destination     string
-	DnsCheckingMsg  string
+	ResponseCode    int    `json:"response_code"`
+	ResponseMessage string `json:"message"`
+	Origin          string `json:"from"`
+	Destination     string `json:"to"`
+	DnsCheckingMsg  string `json:"dns_checking"`
 }
 
 //implement the interface Propagator on Payload type

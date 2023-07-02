@@ -89,7 +89,7 @@ var LaunchHttpCommand = &cobra.Command{
 			filteredEndPoints = make([]interface{}, 0)
 			for _, aVal := range endPoints {
 				if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {
-					if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != AppName {
+					if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != httpCmdParams.appName {
 						filteredEndPoints = append(filteredEndPoints, aMapEp)
 					}
 				}
@@ -160,7 +160,7 @@ var monitorDeployment = &cobra.Command{
 		informers.AddEventHandler(cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				aDep := obj.(*v1.Deployment)
-				Logger.Info("created deployment", zap.String("name", aDep.GetName()))
+				Logger.Info("created deployment", zap.String("name", aDep.GetName()), zap.String("namespace", aDep.GetNamespace()))
 
 			},
 			DeleteFunc: func(obj interface{}) {
