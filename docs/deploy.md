@@ -16,7 +16,7 @@ endPoints:
 - name: storage 
   url: http://storage.magellan.svc.cluster.local:8082/ping
 EOF
-``
+```
 
 That command creates a yaml file, `app-config.yaml`
 
