@@ -153,31 +153,6 @@ func init() {
 	if Logger, crLoggErr = config.Build(); crLoggErr != nil {
 		panic("error when setup the log")
 	}
-	// flag.StringVar(&configPath, "config", "config/sam-ping.yaml", "a config string variable")
-	// flag.Parse()
-	// viper.SetConfigFile(configPath)
-	// if errRead := viper.ReadInConfig(); errRead != nil {
-	// 	Logger.Error("error while loading config", zap.String("config file", configPath), zap.Error(errRead))
-	// }
-	// Port = viper.GetInt("port")
-
-	// anEndpoints := viper.Get("endPoints")
-	// var ok bool
-	// if endPoints, ok = anEndpoints.([]interface{}); ok {
-	// 	Logger.Info("Reading configuration", zap.Int("port", Port), zap.Any("endpoints", endPoints))
-	// 	filteredEndPoints = make([]interface{}, 0)
-	// 	for _, aVal := range endPoints {
-	// 		if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {
-	// 			if aNamestr, isString := aMapEp["name"].(string); isString && aNamestr != AppName {
-	// 				filteredEndPoints = append(filteredEndPoints, aMapEp)
-	// 			}
-	// 		}
-	// 	}
-	// 	Logger.Info("Final endpoints", zap.Any("filteredEndPoints", filteredEndPoints))
-
-	// }
-
-	//httpParam = HttpCmdParam{}
 
 	kClientCmdParams = KubeClientCmd{
 		inCluster: "",
