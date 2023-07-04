@@ -92,25 +92,26 @@ There is docker compose file, in this project under, `sam-ping-compose` folder.
 This file, defines the the service configuration for the container to be run.
 
 ```yaml
+---
 version: '2'
-  services:
-    frontend:
-      image: samutup/http-ping:0.0.8
-      command: ["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping.yaml" ]
-      hostname: frontend.magellan.svc.cluster.local
-      container_name: frontend
-      ports:
+services:
+  frontend:
+    image: samutup/http-ping:0.0.8
+    command: ["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping-docker.yaml" ]
+    hostname: frontend.magellan.svc.cluster.local
+    container_name: frontend
+    ports:
       - "8080:5115"
-      volumes:
+    volumes:
       - "./config:/app/config"
-    backend:
-      image: samutup/http-ping:0.0.8
-      command: ["/app/http-ping","launchHttp","--appName=backend","--config=/app/config/sam-ping.yaml" ]
-      hostname: backend.magellan.svc.cluster.local
-      container_name: backend
-      ports:
+  backend:
+    image: samutup/http-ping:0.0.8
+    command: ["/app/http-ping","launchHttp","--appName=backend","--config=/app/config/sam-ping-docker.yaml" ]
+    hostname: backend.magellan.svc.cluster.local
+    container_name: backend
+    ports:
       - "8081:5115"
-      volumes:
+    volumes:
       - "./config:/app/config"
 ```
 In this case, 2 containers will run with the name, `frontend` and `backend`
@@ -130,7 +131,7 @@ endPoints:
   url: http://backend:5115/ping
 ```
 
-Please take a note that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping-docker.yaml` from the host's folder. That is the reason why the docker compose overrides the `ENTRYPOINT` docker file instruction to be, `["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping.yaml" ]` through `command` directive.
+Please take a note that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping-docker.yaml` from the host's folder. That is the reason why the docker compose overrides the `ENTRYPOINT` docker file instruction to be, `/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping-docker.yaml` through `command` directive.
 
 
 Go into the folder then run the command,
