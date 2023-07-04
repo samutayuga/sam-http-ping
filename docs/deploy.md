@@ -29,8 +29,8 @@ That command creates a yaml file, `app-config.yaml`
 ```shell
 kubectl create secret docker-registry samutup-secrets \
 --docker-server=https://hub.docker.com \
---docker-username=samutup \
---docker-password=Balinese100% \
+--docker-username=XXXX \
+--docker-password=XXXX \
 --namespace magellan \
 --output yaml --dry-run=client | kubectl apply -f -
 ```
