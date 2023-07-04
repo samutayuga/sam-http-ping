@@ -72,7 +72,7 @@ The first step to make the application available for cloud deployment, is to mak
 The command to build the docker image is,
 
 ```shell
-docker build -t samutup/http-ping:0.0.1-SNAPSHOT -f Dockerfile .
+docker build -t samutup/http-ping:0.0.8 -f Dockerfile .
 ```
 If everything goes well you should see,
 
@@ -81,7 +81,7 @@ If everything goes well you should see,
  => exporting to image                                                                                                      0.1s
  => => exporting layers                                                                                                     0.1s
  => => writing image sha256:e563410b71a23c20cf241cea94b126453883b8ff4268b50a8b864d0130334c08                                0.0s
- => => naming to docker.io/samutup/http-ping:0.0.1-SNAPSHOT 
+ => => naming to docker.io/samutup/http-ping:0.0.8
 ```
 
 All right, now a brand new docker image is created in the local docker registry. 
@@ -130,7 +130,7 @@ endPoints:
   url: http://backend:5115/ping
 ```
 
-Please take a note that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping.yaml` from the host's folder.
+Please take a note that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping-docker.yaml` from the host's folder. That is the reason why the docker compose overrides the `ENTRYPOINT` docker file instruction to be, `["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping.yaml" ]` through `command` directive.
 
 
 Go into the folder then run the command,
