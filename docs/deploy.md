@@ -1,6 +1,6 @@
-## Deploy into kubernetes cluster
+# Deploy into kubernetes cluster
 
-`Prepare Config Map`
+## Prepare Config Map
 
 
 ```
@@ -107,7 +107,7 @@ spec:
 EOF
 ```
 
-Verify if the deployment is working fine.
+Verify if the deployment is created successfully
 
 
 `k get all -n magellan -l app=frontend`
