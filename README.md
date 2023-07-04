@@ -130,7 +130,7 @@ endPoints:
   url: http://backend:5115/ping
 ```
 
-Please take a not that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping.yaml` from the host's folder.
+Please take a note that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping.yaml` from the host's folder.
 
 
 Go into the folder then run the command,
@@ -155,22 +155,36 @@ You should see,
 
 ```text
 > docker-compose logs --follow
-http-ping  | 2023-07-04T01:33:43.285Z   INFO    cmd/sam_cmd.go:75       args    {"args": []}
-http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:88       Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
-http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:97       Final endpoints {"filteredEndPoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
-http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:103      args    {"args": [], "params": "backend"}
-http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:42       starting http server    {"appName": "backend", "address": ":5115"}
-http-ping  |   _                      _                         _
-http-ping  |  | |__     __ _    ___  | | __   ___   _ __     __| |
-http-ping  |  | '_ \   / _` |  / __| | |/ /  / _ \ | '_ \   / _` |
-http-ping  |  | |_) | | (_| | | (__  |   <  |  __/ | | | | | (_| |
-http-ping  |  |_.__/   \__,_|  \___| |_|\_\  \___| |_| |_|  \__,_|
-``
+backend   | 2023-07-04T02:55:01.743Z    INFO    cmd/sam_cmd.go:75       args    {"args": ["/app/http-ping", "launchHttp"]}
+backend   | 2023-07-04T02:55:01.746Z    INFO    cmd/sam_cmd.go:88       Reading configuration   {"filename": "/app/config/sam-ping-docker.yaml", "port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend:5115/ping"},{"name":"backend","url":"http://backend:5115/ping"}]}
+backend   | 2023-07-04T02:55:01.746Z    INFO    cmd/sam_cmd.go:97       Final endpoints {"filteredEndPoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend:5115/ping"}]}
+backend   | 2023-07-04T02:55:01.746Z    INFO    cmd/sam_cmd.go:103      args    {"args": ["/app/http-ping", "launchHttp"], "params": "backend"}
+backend   | 2023-07-04T02:55:01.747Z    INFO    cmd/sam_cmd.go:42       starting http server    {"appName": "backend", "address": ":5115"}
+backend   |   _                      _                         _
+backend   |  | |__     __ _    ___  | | __   ___   _ __     __| |
+backend   |  | '_ \   / _` |  / __| | |/ /  / _ \ | '_ \   / _` |
+backend   |  | |_) | | (_| | | (__  |   <  |  __/ | | | | | (_| |
+backend   |  |_.__/   \__,_|  \___| |_|\_\  \___| |_| |_|  \__,_|
+frontend  | 2023-07-04T02:55:01.718Z    INFO    cmd/sam_cmd.go:75       args    {"args": ["/app/http-ping", "launchHttp"]}
+frontend  | 2023-07-04T02:55:01.722Z    INFO    cmd/sam_cmd.go:88       Reading configuration   {"filename": "/app/config/sam-ping-docker.yaml", "port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend:5115/ping"},{"name":"backend","url":"http://backend:5115/ping"}]}
+frontend  | 2023-07-04T02:55:01.722Z    INFO    cmd/sam_cmd.go:97       Final endpoints {"filteredEndPoints": [{"name":"google","url":"https://www.google.com"},{"name":"backend","url":"http://backend:5115/ping"}]}
+frontend  | 2023-07-04T02:55:01.722Z    INFO    cmd/sam_cmd.go:103      args    {"args": ["/app/http-ping", "launchHttp"], "params": "frontend"}
+frontend  | 2023-07-04T02:55:01.722Z    INFO    cmd/sam_cmd.go:42       starting http server    {"appName": "frontend", "address": ":5115"}
+frontend  |    __                          _                        _
+frontend  |   / _|  _ __    ___    _ __   | |_    ___   _ __     __| |
+frontend  |  | |_  | '__|  / _ \  | '_ \  | __|  / _ \ | '_ \   / _` |
+frontend  |  |  _| | |    | (_) | | | | | | |_  |  __/ | | | | | (_| |
+frontend  |  |_|   |_|     \___/  |_| |_|  \__|  \___| |_| |_|  \__,_|
+frontend  | 2023-07-04T02:55:48.189Z    INFO    cmd/handler.go:120      Serving request {"origin": "127.0.0.1:8080"}
+frontend  | 2023-07-04T02:55:48.190Z    INFO    cmd/handler.go:87       ip address is resolved properly {"host": "backend:5115", "ip address": ["172.20.0.3"]}
+```
+
 Now, it is time to test it,
 
 ```shell
 curl 127.0.0.1:8080/propagate | jq
 ```
+
 The following is the expected output,
 
 ```json
