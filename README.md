@@ -1,4 +1,4 @@
-# sam-http-ping
+# Generic Purpose of app
 
 ## Environment
 
@@ -17,13 +17,22 @@ go mod tidy
 Run the main file,
 
 ```shell
-go run main.go
+go run main.go launchHttp --appName backend --config config/app-config.yaml
 ```
 
 If everything goes well, the console should show,
 
 ```text
-http-ping  | 2023-05-25T12:54:04.402Z   INFO    cmd/handler.go:135      Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082"}]}
+2023-07-04T09:22:32.528+0800    INFO    cmd/sam_cmd.go:75       args    {"args": []}
+2023-07-04T09:22:32.528+0800    INFO    cmd/sam_cmd.go:88       Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
+2023-07-04T09:22:32.528+0800    INFO    cmd/sam_cmd.go:97       Final endpoints {"filteredEndPoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
+2023-07-04T09:22:32.528+0800    INFO    cmd/sam_cmd.go:103      args    {"args": [], "params": "backend"}
+2023-07-04T09:22:32.529+0800    INFO    cmd/sam_cmd.go:42       starting http server    {"appName": "backend", "address": ":5115"}
+  _                      _                         _
+ | |__     __ _    ___  | | __   ___   _ __     __| |
+ | '_ \   / _` |  / __| | |/ /  / _ \ | '_ \   / _` |
+ | |_) | | (_| | | (__  |   <  |  __/ | | | | | (_| |
+ |_.__/   \__,_|  \___| |_|\_\  \___| |_| |_|  \__,_|
 ```
 
 The port is 5115 by default, so that, try to make the http call by using any rest client, eg. [Postman](https://www.postman.com/downloads/) or `curl`.
@@ -37,31 +46,20 @@ curl 127.0.0.1:5115/propagate | jq
 You should see the following response,
 
 ```json
-...
 [
   {
-    "ResponseCode": 200,
-    "ResponseMessage": "200 OK",
-    "Origin": "http-ping",
-    "Destination": "https://www.google.com"
+    "response_code": 200,
+    "message": "200 OK",
+    "from": "frontend.magellan.svc.cluster.local",
+    "to": "http://backend:5115/ping",
+    "dns_checking": "backend:5115 is resolved succesfully, ip address [172.20.0.3] "
   },
   {
-    "ResponseCode": -1,
-    "ResponseMessage": "Get \"http://frontend.magellan.svc.cluster.local:8080\": dial tcp: lookup frontend.magellan.svc.cluster.local: Try again",
-    "Origin": "http-ping",
-    "Destination": "http://frontend.magellan.svc.cluster.local:8080"
-  },
-  {
-    "ResponseCode": -1,
-    "ResponseMessage": "Get \"http://backend.magellan.svc.cluster.local:8081\": dial tcp: lookup backend.magellan.svc.cluster.local: Try again",
-    "Origin": "http-ping",
-    "Destination": "http://backend.magellan.svc.cluster.local:8081"
-  },
-  {
-    "ResponseCode": -1,
-    "ResponseMessage": "Get \"http://storage.magellan.svc.cluster.local:8082\": dial tcp: lookup storage.magellan.svc.cluster.local: Try again",
-    "Origin": "http-ping",
-    "Destination": "http://storage.magellan.svc.cluster.local:8082"
+    "response_code": 200,
+    "message": "200 OK",
+    "from": "frontend.magellan.svc.cluster.local",
+    "to": "https://www.google.com",
+    "dns_checking": "www.google.com is resolved succesfully, ip address [142.251.12.147 142.251.12.99 142.251.12.104 142.251.12.105 142.251.12.106 142.251.12.103 2404:6800:4003:c1a::67 2404:6800:4003:c1a::93 2404:6800:4003:c1a::63 2404:6800:4003:c1a::69] "
   }
 ]
 ```
@@ -95,18 +93,46 @@ This file, defines the the service configuration for the container to be run.
 
 ```yaml
 version: '2'
-services:
-  http-ping:
-    image: samutup/http-ping:0.0.1-SNAPSHOT
-    hostname: http-ping.backend
-    container_name: http-ping
-    ports:
-      - "5115:5115"
-    environment:
-      LABEL_ENV: backend
+  services:
+    frontend:
+      image: samutup/http-ping:0.0.8
+      command: ["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping.yaml" ]
+      hostname: frontend.magellan.svc.cluster.local
+      container_name: frontend
+      ports:
+      - "8080:5115"
+      volumes:
+      - "./config:/app/config"
+    backend:
+      image: samutup/http-ping:0.0.8
+      command: ["/app/http-ping","launchHttp","--appName=backend","--config=/app/config/sam-ping.yaml" ]
+      hostname: backend.magellan.svc.cluster.local
+      container_name: backend
+      ports:
+      - "8081:5115"
+      volumes:
+      - "./config:/app/config"
 ```
-In this case, the container will run with the name, `http-ping`, with hostname, `http-ping.backend`
-It exposes the port `5115` and listening at port `5115`
+In this case, 2 containers will run with the name, `frontend` and `backend`
+It exposes the port `8080` for frontend and `8081` for `backend`. Both are listening at port `5115`
+To reach the `backend` from `frontend` within the container runtime, it is simply, `GET http://backend:5115/ping`,
+while, to reach the backend from, outside of the container runtime, eg, from the `host` machine (developer machine),
+`GET http://127.0.0.1:8080/ping`. For this gets to work the configuration file for docker environment looks like,
+
+```yaml
+port: 5115
+endPoints:
+- name: google
+  url: https://www.google.com
+- name: frontend
+  url: http://frontend:5115/ping
+- name: backend
+  url: http://backend:5115/ping
+```
+
+Please take a not that, through `volumes` directive, we override the existing `/app/config/sam-ping.yaml` file with the `./config/sam-ping.yaml` from the host's folder.
+
+
 Go into the folder then run the command,
 
 ```shell
@@ -128,16 +154,43 @@ docker-compose logs --follow
 You should see,
 
 ```text
-export APP_NAME=BACKEND && go run main.go
-2023-06-29T08:51:40.306+0800    INFO    cmd/handler.go:163      Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
-2023-06-29T08:51:40.306+0800    INFO    sam-http-ping/main.go:26        starting http server    {"appName": "BACKEND", "address": ":5115"}
-  ____       _       ____   _  __  _____   _   _   ____
- | __ )     / \     / ___| | |/ / | ____| | \ | | |  _ \
- |  _ \    / _ \   | |     | ' /  |  _|   |  \| | | | | |
- | |_) |  / ___ \  | |___  | . \  | |___  | |\  | | |_| |
- |____/  /_/   \_\  \____| |_|\_\ |_____| |_| \_| |____/
-```
+> docker-compose logs --follow
+http-ping  | 2023-07-04T01:33:43.285Z   INFO    cmd/sam_cmd.go:75       args    {"args": []}
+http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:88       Reading configuration   {"port": 5115, "endpoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"backend","url":"http://backend.magellan.svc.cluster.local:8081/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
+http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:97       Final endpoints {"filteredEndPoints": [{"name":"google","url":"https://www.google.com"},{"name":"frontend","url":"http://frontend.magellan.svc.cluster.local:8080/ping"},{"name":"storage","url":"http://storage.magellan.svc.cluster.local:8082/ping"}]}
+http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:103      args    {"args": [], "params": "backend"}
+http-ping  | 2023-07-04T01:33:43.286Z   INFO    cmd/sam_cmd.go:42       starting http server    {"appName": "backend", "address": ":5115"}
+http-ping  |   _                      _                         _
+http-ping  |  | |__     __ _    ___  | | __   ___   _ __     __| |
+http-ping  |  | '_ \   / _` |  / __| | |/ /  / _ \ | '_ \   / _` |
+http-ping  |  | |_) | | (_| | | (__  |   <  |  __/ | | | | | (_| |
+http-ping  |  |_.__/   \__,_|  \___| |_|\_\  \___| |_| |_|  \__,_|
+``
+Now, it is time to test it,
 
+```shell
+curl 127.0.0.1:8080/propagate | jq
+```
+The following is the expected output,
+
+```json
+[
+  {
+    "response_code": 200,
+    "message": "200 OK",
+    "from": "frontend.magellan.svc.cluster.local",
+    "to": "http://backend:5115/ping",
+    "dns_checking": "backend:5115 is resolved succesfully, ip address [172.20.0.3] "
+  },
+  {
+    "response_code": 200,
+    "message": "200 OK",
+    "from": "frontend.magellan.svc.cluster.local",
+    "to": "https://www.google.com",
+    "dns_checking": "www.google.com is resolved succesfully, ip address [142.251.12.147 142.251.12.99 142.251.12.104 142.251.12.105 142.251.12.106 142.251.12.103 2404:6800:4003:c1a::67 2404:6800:4003:c1a::93 2404:6800:4003:c1a::63 2404:6800:4003:c1a::69] "
+  }
+]
+```
 To deploy into kubernetes cluster, please follow, [Deploy to kubernetes](./docs/deploy.md)
 
 

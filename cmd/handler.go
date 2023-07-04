@@ -48,14 +48,13 @@ func (p *SamPayload) doGet(url string) *SamResponse {
 }
 
 var (
-	Logger              *zap.Logger
-	crLoggErr           error
-	configPath, AppName string
-	endPoints           []interface{}
-	Port                int
-	filteredEndPoints   []interface{}
-	kClientCmdParams    KubeClientCmd
-	httpCmdParams       HttpCmdParam
+	Logger            *zap.Logger
+	crLoggErr         error
+	endPoints         []interface{}
+	Port              int
+	filteredEndPoints []interface{}
+	kClientCmdParams  KubeClientCmd
+	httpCmdParams     HttpCmdParam
 	//givenAppName        string
 	//httpParam           *HttpCmdParam
 )

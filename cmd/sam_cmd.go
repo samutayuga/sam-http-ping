@@ -78,14 +78,14 @@ var LaunchHttpCommand = &cobra.Command{
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		viper.SetConfigFile(httpCmdParams.configLocation)
 		if errRead := viper.ReadInConfig(); errRead != nil {
-			Logger.Error("error while loading config", zap.String("config file", configPath), zap.Error(errRead))
+			Logger.Error("error while loading config", zap.String("config file", httpCmdParams.configLocation), zap.Error(errRead))
 		}
 		Port = viper.GetInt("port")
 
 		anEndpoints := viper.Get("endPoints")
 		var ok bool
 		if endPoints, ok = anEndpoints.([]interface{}); ok {
-			Logger.Info("Reading configuration", zap.Int("port", Port), zap.Any("endpoints", endPoints))
+			Logger.Info("Reading configuration", zap.String("filename", httpCmdParams.configLocation), zap.Int("port", Port), zap.Any("endpoints", endPoints))
 			filteredEndPoints = make([]interface{}, 0)
 			for _, aVal := range endPoints {
 				if aMapEp, isMatch := aVal.(map[string]interface{}); isMatch {

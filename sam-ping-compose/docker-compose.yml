@@ -1,11 +1,21 @@
 ---
 version: '2'
 services:
-  http-ping:
-    image: samutup/http-ping:0.0.1-SNAPSHOT
-    hostname: http-ping
-    container_name: http-ping
+  frontend:
+    image: samutup/http-ping:0.0.8
+    command: ["/app/http-ping","launchHttp","--appName=frontend","--config=/app/config/sam-ping-docker.yaml" ]
+    hostname: frontend.magellan.svc.cluster.local
+    container_name: frontend
     ports:
-      - "5115:5115"
-    environment:
-      APP_NAME: DOCKER_APP
+      - "8080:5115"
+    volumes:
+      - "./config:/app/config"
+  backend:
+    image: samutup/http-ping:0.0.8
+    command: ["/app/http-ping","launchHttp","--appName=backend","--config=/app/config/sam-ping-docker.yaml" ]
+    hostname: backend.magellan.svc.cluster.local
+    container_name: backend
+    ports:
+      - "8081:5115"
+    volumes:
+      - "./config:/app/config"

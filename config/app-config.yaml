@@ -1,0 +1,8 @@
+port: 5115
+endPoints:
+- name: google
+  url: https://www.google.com
+- name: frontend
+  url: http://frontend.magellan.svc.cluster.local:8080/ping
+- name: backend
+  url: http://backend.magellan.svc.cluster.local:8081/ping    
