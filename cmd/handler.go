@@ -27,7 +27,7 @@ type SamResponse struct {
 	DnsCheckingMsg  string `json:"dns_checking"`
 }
 
-//implement the interface Propagator on Payload type
+// implement the interface Propagator on Payload type
 func (p *SamPayload) doGet(url string) *SamResponse {
 	var hostN string
 	var errH error
@@ -166,5 +166,11 @@ func init() {
 	RootCommand.AddCommand(monitorDeployment)
 	monitorDeployment.Flags().StringVarP(&kClientCmdParams.inCluster, "inCluster", "i", "false", "monitorDeployment -i false")
 	monitorDeployment.MarkFlagRequired("inCluster")
+	RootCommand.AddCommand(gitlabRepListCmd)
+	gitlabRepListCmd.Flags().StringVarP(&personalToken, "personalToken", "e", "abcd", "gitlabcaptor -e abcd")
+	gitlabRepListCmd.MarkFlagRequired("personalToken")
 
+	RootCommand.AddCommand(formatTransformerCmd)
+	formatTransformerCmd.Flags().StringVarP(&xmlFile, "xmlPath", "x", "/Users/putumas/Downloads/ATS_AircraftTypeList.xml", "formatTransformer -x /Users/putumas/Downloads/ATS_AircraftTypeList.xml")
+	formatTransformerCmd.MarkFlagRequired("xmlPath")
 }

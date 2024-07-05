@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gorilla/mux"
@@ -18,7 +17,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var RootCommand = &cobra.Command{
@@ -116,31 +114,10 @@ var monitorDeployment = &cobra.Command{
 		//clientcmd.BuildConfigFromFlags
 		Logger.Info("preRun for kubeclient", zap.Any("inCluster", kClientCmdParams.inCluster))
 		var errConfig error
-		if kClientCmdParams.inCluster == "false" {
-			hDir := os.Getenv("HOME")
-			fPath := filepath.Join(hDir, ".kube", "config")
-			kClientCmdParams.rConfig, errConfig = clientcmd.BuildConfigFromFlags("", fPath)
-
-		} else {
-			kClientCmdParams.rConfig, errConfig = clientcmd.BuildConfigFromFlags("", "")
-
-		}
-		if errConfig != nil {
-			Logger.Fatal("error while getting config for kubernetes", zap.Error(errConfig))
+		if kClientCmdParams.kClientSet, errConfig = buildKubeClient(); errConfig != nil {
 			return errConfig
-
-		} else {
-
-			Logger.Info("kube config is created", zap.String("config", kClientCmdParams.rConfig.Host))
-			kClientCmdParams.kClientSet, errConfig = kubernetes.NewForConfig(kClientCmdParams.rConfig)
-			if errConfig != nil {
-				Logger.Fatal("error while creating clientset", zap.Error(errConfig))
-				return errConfig
-			}
-			Logger.Info("successfully create clientset")
-
-			return nil
 		}
+		return nil
 
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
