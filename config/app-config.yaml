@@ -5,4 +5,21 @@ endPoints:
 - name: frontend
   url: http://frontend.magellan.svc.cluster.local:8080/ping
 - name: backend
-  url: http://backend.magellan.svc.cluster.local:8081/ping    
+  url: http://backend.magellan.svc.cluster.local:8081/ping
+gitlabSearch:
+  groupDescriptor:
+    groupByUrls:
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/components/cdo-advisory-tool
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/green-aviation
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/components/green-aviation-kpi
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/components/green-aviation-simulation-tools
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/components/ossp
+    - https://gitlab.thalesdigital.io/groups/ams-airlab/components/rep
+    groupByIds:
+    - id: 53932
+      name: tbo
+  baseUrl: https://gitlab.thalesdigital.io/api/v4
+  page: 1
+  rowPerPage: 5000
+
+
