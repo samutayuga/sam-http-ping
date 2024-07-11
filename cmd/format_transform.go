@@ -70,7 +70,7 @@ func (a *Aircraft) toMap() map[string]interface{} {
 }
 
 func (a *Aircraft) persist() error {
-	fName := fmt.Sprintf("%s.yaml", a.Type)
+	fName := fmt.Sprintf("%s/%s.yaml", dumpFolder, a.Type)
 
 	if f, errCr := os.OpenFile(fName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600); errCr == nil {
 		defer f.Close()
@@ -138,7 +138,7 @@ type Fuel struct {
 type FlightLevelProperties struct {
 	FlightLevel  int
 	Temperature  int     `xml:"T,attr"`
-	Pressure     int     `xml:"P,attr"`
+	Pressure     int     `xml:"p,attr"`
 	Rho          float32 `xml:"rho,attr"`
 	SpeedOfSound float64 `xml:"a,attr"`
 	TAS          float64 `xml:"TAS,attr"`
@@ -192,18 +192,19 @@ type Configuration struct {
 	Vstall float64 `xml:"Vstall,attr"`
 	CD0    float64 `xml:"CD0,attr"`
 	CD2    float64 `xml:"CD2,attr"`
-	Gear   Gear    `xml:"gear"`
 }
 type Gear struct {
-	CD0DeltaDG float64 `xml:"CD0_deltaLDG,attr"`
+	CD0deltaLDG float64 `xml:"CD0_deltaLDG,attr"`
 }
 type Aerodynamics struct {
 	WingSurf      float64         `xml:"wingSurf,attr"`
 	Configuration []Configuration `xml:"configuration"`
+	Gear          Gear            `xml:"gear"`
 }
 
 var (
 	xmlFile    string
+	dumpFolder string
 	xmlContent PerformanceData
 	xmlBytes   []byte
 	readXmlErr error

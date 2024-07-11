@@ -173,4 +173,6 @@ func init() {
 	RootCommand.AddCommand(formatTransformerCmd)
 	formatTransformerCmd.Flags().StringVarP(&xmlFile, "xmlPath", "x", "/Users/putumas/Downloads/ATS_AircraftTypeList.xml", "formatTransformer -x /Users/putumas/Downloads/ATS_AircraftTypeList.xml")
 	formatTransformerCmd.MarkFlagRequired("xmlPath")
+	formatTransformerCmd.Flags().StringVarP(&dumpFolder, "dumpFolder", "d", "/Users/putumas.mertayasa.e/Developer/rcp_backend/aircraft-performance-model/src/main/resources/data", "formatTransformer -d /Users/putumas.mertayasa.e/Developer/rcp_backend/aircraft-performance-model/src/main/resources/data")
+	formatTransformerCmd.MarkFlagRequired("dumpFolder")
 }
